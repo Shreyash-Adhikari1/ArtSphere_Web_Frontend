@@ -1,60 +1,114 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { loginSchema } from "../schema";
 import { z } from "zod";
+import { useRouter } from "next/navigation";
 
-const loginSchema = z.object({
-    email: z.string().email("Invalid email"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-});
-
-type LoginData = z.infer<typeof loginSchema>;
+type LoginFormData = z.infer<typeof loginSchema>;
 
 export default function LoginForm() {
-    const [showPassword, setShowPassword] = useState(false);
+    const router = useRouter();
 
-    const { register, handleSubmit, formState: { errors } } = useForm<LoginData>({
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
     });
 
-    const onSubmit = (data: LoginData) => {
-        console.log("Login Data:", data);
+    const onSubmit = (data: LoginFormData) => {
+        console.log("Login data:", data);
+
+        // simulate successful login
+        router.push("/auth/dashboard");
     };
 
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-[400px]">
-            <input
-                {...register("email")}
-                placeholder="Email"
-                className="p-3 rounded-full bg-[#C974A6]/20 border border-gray-300 focus:outline-none"
-            />
-            {errors.email && <p className="text-red-600">{errors.email.message}</p>}
+        <div className="flex min-h-screen items-center justify-center bg-white">
+            <div className="flex w-full max-w-6xl items-center justify-around p-10">
 
-            <div className="relative">
-                <input
-                    {...register("password")}
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Password"
-                    className="p-3 rounded-full bg-[#C974A6]/20 border border-gray-300 focus:outline-none w-full"
-                />
-                <button
-                    type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3 top-3 text-gray-500"
+                {/* Left Side: Form */}
+                <form
+                    onSubmit={handleSubmit(onSubmit)}
+                    className="flex flex-col w-full max-w-sm"
                 >
-                    {showPassword ? "Hide" : "Show"}
-                </button>
-            </div>
-            {errors.password && <p className="text-red-600">{errors.password.message}</p>}
+                    <h1 className="text-5xl font-bold mb-12 text-black">Login</h1>
 
-            <button
-                type="submit"
-                className="bg-[#C974A6] text-white py-3 rounded-full mt-2 hover:bg-[#B36293] transition"
-            >
-                Login
-            </button>
-        </form>
+                    <div className="space-y-6 mb-10">
+                        <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2">📧</span>
+                            <input
+                                type="email"
+                                placeholder="Email"
+                                {...register("email")}
+                                className="w-full py-4 pl-12 pr-4 rounded-full bg-[#F3E8EE] text-black outline-none focus:ring-2 focus:ring-[#C974A6]"
+                            />
+                            {errors.email && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {errors.email.message}
+                                </p>
+                            )}
+                        </div>
+
+                        <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2">🔒</span>
+                            <input
+                                type="password"
+                                placeholder="Password"
+                                {...register("password")}
+                                className="w-full py-4 pl-12 pr-12 rounded-full bg-[#F3E8EE] text-black outline-none focus:ring-2 focus:ring-[#C974A6]"
+                            />
+                            {errors.password && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {errors.password.message}
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="flex flex-col items-center space-y-4">
+                        <button
+                            type="submit"
+                            className="bg-[#C974A6] text-white px-20 py-3 rounded-full text-lg font-semibold hover:opacity-90 transition shadow-md"
+                        >
+                            Login
+                        </button>
+
+                        <Link
+                            href="#"
+                            className="text-[#FF0000] text-sm font-bold hover:underline"
+                        >
+                            forgot your password?
+                        </Link>
+                    </div>
+
+                    <div className="mt-12 text-center text-gray-500 font-medium">
+                        Don't have an Account?{" "}
+                        <Link href="/register" className="text-[#FF0000] font-bold">
+                            Signup!
+                        </Link>
+                    </div>
+                </form>
+
+                {/* Right Side: Illustration */}
+                <div className="hidden lg:block relative">
+                    <div className="w-[450px] h-[450px] rounded-full overflow-hidden border-2 border-gray-100 flex items-center justify-center">
+                        <Image
+                            src="/images/artsphere_logo.png"
+                            alt="ArtSphere Illustration"
+                            width={450}
+                            height={450}
+                            className="object-contain p-8"
+                        />
+                    </div>
+                </div>
+
+            </div>
+        </div>
     );
 }
