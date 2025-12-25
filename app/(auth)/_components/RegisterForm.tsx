@@ -1,65 +1,123 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import Image from "next/image";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { registerSchema } from "../schema";
 import { z } from "zod";
 
-const registerSchema = z.object({
-    fullName: z.string().min(1, "Full Name required"),
-    email: z.string().email("Invalid email"),
-    phoneNumber: z.string().min(10, "Enter valid phone number"),
-    address: z.string().min(1, "Address required"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-    confirmPassword: z.string().min(6, "Confirm Password required"),
-}).refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-});
-
-type RegisterData = z.infer<typeof registerSchema>;
+type RegisterFormData = z.infer<typeof registerSchema>;
 
 export default function RegisterForm() {
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirm, setShowConfirm] = useState(false);
-
-    const { register, handleSubmit, formState: { errors } } = useForm<RegisterData>({
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+    } = useForm<RegisterFormData>({
         resolver: zodResolver(registerSchema),
     });
 
-    const onSubmit = (data: RegisterData) => {
-        console.log("Register Data:", data);
+    const onSubmit = (data: RegisterFormData) => {
+        console.log("Register data:", data);
     };
 
+    const inputBg = "bg-[#F3E8EE]";
+    const iconStyle =
+        "absolute left-5 top-1/2 -translate-y-1/2 text-black text-lg";
+    const inputStyle = `w-full py-3.5 pl-14 pr-12 rounded-full ${inputBg} text-black font-serif text-base outline-none focus:ring-2 focus:ring-[#C974A6]`;
+
     return (
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4 w-[400px]">
-            <input {...register("fullName")} placeholder="Full Name" className="p-3 rounded-full bg-[#C974A6]/20 border border-gray-300 focus:outline-none" />
-            {errors.fullName && <p className="text-red-600">{errors.fullName.message}</p>}
+        <div className="min-h-screen w-full bg-white flex items-center font-serif overflow-x-hidden">
+            <form
+                onSubmit={handleSubmit(onSubmit)}
+                className="flex items-center w-full"
+            >
+                <div style={{ marginLeft: "261px" }} className="w-[420px] flex flex-col">
+                    <h1 className="text-5xl font-bold mb-10 text-black">Signup</h1>
 
-            <input {...register("email")} placeholder="Email" className="p-3 rounded-full bg-[#C974A6]/20 border border-gray-300 focus:outline-none" />
-            {errors.email && <p className="text-red-600">{errors.email.message}</p>}
+                    <div className="space-y-4 mb-10">
+                        {[
+                            { name: "fullName", icon: "👤", placeholder: "Full Name" },
+                            { name: "email", icon: "✉️", placeholder: "Email" },
+                            { name: "phoneNumber", icon: "📞", placeholder: "Phone Number" },
+                            { name: "address", icon: "📍", placeholder: "Address" },
+                        ].map((field) => (
+                            <div key={field.name} className="relative">
+                                <span className={iconStyle}>{field.icon}</span>
+                                <input
+                                    {...register(field.name as keyof RegisterFormData)}
+                                    placeholder={field.placeholder}
+                                    className={inputStyle}
+                                />
+                                {errors[field.name as keyof RegisterFormData] && (
+                                    <p className="text-red-500 text-sm mt-1">
+                                        {
+                                            errors[field.name as keyof RegisterFormData]
+                                                ?.message as string
+                                        }
+                                    </p>
+                                )}
+                            </div>
+                        ))}
 
-            <input {...register("phoneNumber")} placeholder="Phone Number" className="p-3 rounded-full bg-[#C974A6]/20 border border-gray-300 focus:outline-none" />
-            {errors.phoneNumber && <p className="text-red-600">{errors.phoneNumber.message}</p>}
+                        <div className="relative">
+                            <span className={iconStyle}>🔒</span>
+                            <input
+                                type="password"
+                                placeholder="Password"
+                                {...register("password")}
+                                className={inputStyle}
+                            />
+                            {errors.password && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {errors.password.message}
+                                </p>
+                            )}
+                        </div>
 
-            <input {...register("address")} placeholder="Address" className="p-3 rounded-full bg-[#C974A6]/20 border border-gray-300 focus:outline-none" />
-            {errors.address && <p className="text-red-600">{errors.address.message}</p>}
+                        <div className="relative">
+                            <span className={iconStyle}>🔒</span>
+                            <input
+                                type="password"
+                                placeholder="Confirm Password"
+                                {...register("confirmPassword")}
+                                className={inputStyle}
+                            />
+                            {errors.confirmPassword && (
+                                <p className="text-red-500 text-sm mt-1">
+                                    {errors.confirmPassword.message}
+                                </p>
+                            )}
+                        </div>
+                    </div>
 
-            <div className="relative">
-                <input {...register("password")} type={showPassword ? "text" : "password"} placeholder="Password" className="p-3 rounded-full bg-[#C974A6]/20 border border-gray-300 focus:outline-none w-full" />
-                <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-3 text-gray-500">{showPassword ? "Hide" : "Show"}</button>
-            </div>
-            {errors.password && <p className="text-red-600">{errors.password.message}</p>}
+                    <button
+                        type="submit"
+                        className="bg-[#C974A6] text-white px-24 py-3 rounded-full text-lg font-bold shadow-md mb-6"
+                    >
+                        Signup
+                    </button>
 
-            <div className="relative">
-                <input {...register("confirmPassword")} type={showConfirm ? "text" : "password"} placeholder="Confirm Password" className="p-3 rounded-full bg-[#C974A6]/20 border border-gray-300 focus:outline-none w-full" />
-                <button type="button" onClick={() => setShowConfirm(!showConfirm)} className="absolute right-3 top-3 text-gray-500">{showConfirm ? "Hide" : "Show"}</button>
-            </div>
-            {errors.confirmPassword && <p className="text-red-600">{errors.confirmPassword.message}</p>}
+                    <p className="text-gray-400 font-medium text-sm">
+                        Already registered?{" "}
+                        <Link href="/login" className="text-[#FF0000] font-bold">
+                            Login!
+                        </Link>
+                    </p>
+                </div>
 
-            <button type="submit" className="bg-[#C974A6] text-white py-3 rounded-full mt-2 hover:bg-[#B36293] transition">
-                Signup
-            </button>
-        </form>
+                <div style={{ marginLeft: "356px" }} className="hidden lg:block">
+                    <div className="w-[520px] h-[520px] rounded-full border flex items-center justify-center">
+                        <Image
+                            src="/images/artsphere_logo.png"
+                            alt=""
+                            width={520}
+                            height={520}
+                        />
+                    </div>
+                </div>
+            </form>
+        </div>
     );
 }
