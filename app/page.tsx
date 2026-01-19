@@ -1,15 +1,25 @@
+"use client"; // should be use client wirh using context
 import Link from "next/link";
 import Image from "next/image";
+// import { useAuth } from "@/context/AuthContext";
 
 export default function LandingPage() {
+  // const { user } = useAuth();
+
   return (
     <div className="min-h-screen bg-white font-serif">
+      {/* {user && <div></div>} */}
       {/* Navbar */}
       <nav className="flex justify-between items-center px-12 py-6">
         <h1 className="text-[#C974A6] text-3xl font-bold">ArtSphere</h1>
         <div className="space-x-8 text-black font-medium">
-          <Link href="/login" className="hover:text-[#C974A6] transition">Login</Link>
-          <Link href="/register" className="bg-[#C974A6] text-white px-8 py-2.5 rounded-full shadow-md hover:brightness-95 transition">
+          <Link href="/login" className="hover:text-[#C974A6] transition">
+            Login
+          </Link>
+          <Link
+            href="/register"
+            className="bg-[#C974A6] text-white px-8 py-2.5 rounded-full shadow-md hover:brightness-95 transition"
+          >
             Join Now
           </Link>
         </div>
@@ -19,17 +29,24 @@ export default function LandingPage() {
       <main className="flex flex-col lg:flex-row items-center justify-between px-12 lg:px-24 py-16 gap-12">
         <div className="max-w-xl space-y-8">
           <h2 className="text-7xl font-bold leading-tight text-black">
-            A safe space for <span className="text-[#C974A6]">student artists.</span>
+            A safe space for{" "}
+            <span className="text-[#C974A6]">student artists.</span>
           </h2>
           <p className="text-gray-600 text-xl leading-relaxed">
-            Connect with fellow creators, share your journey, and grow your portfolio
-            in a community built specifically for students.
+            Connect with fellow creators, share your journey, and grow your
+            portfolio in a community built specifically for students.
           </p>
           <div className="flex gap-4">
-            <Link href="/register" className="bg-[#C974A6] text-white px-10 py-4 rounded-full text-lg font-bold shadow-lg hover:scale-105 transition-transform">
+            <Link
+              href="/register"
+              className="bg-[#C974A6] text-white px-10 py-4 rounded-full text-lg font-bold shadow-lg hover:scale-105 transition-transform"
+            >
               Get Started
             </Link>
-            <Link href="/login" className="border-2 border-[#C974A6] text-[#C974A6] px-10 py-4 rounded-full text-lg font-bold hover:bg-[#F3E8EE] transition">
+            <Link
+              href="/login"
+              className="border-2 border-[#C974A6] text-[#C974A6] px-10 py-4 rounded-full text-lg font-bold hover:bg-[#F3E8EE] transition"
+            >
               View Gallery
             </Link>
           </div>
@@ -54,10 +71,17 @@ export default function LandingPage() {
         <div className="max-w-7xl mx-auto px-12">
           <div className="flex justify-between items-end mb-12">
             <div>
-              <h3 className="text-4xl font-bold text-black mb-4">Explore the Gallery</h3>
-              <p className="text-gray-500 text-lg">See what student artists are creating right now.</p>
+              <h3 className="text-4xl font-bold text-black mb-4">
+                Explore the Gallery
+              </h3>
+              <p className="text-gray-500 text-lg">
+                See what student artists are creating right now.
+              </p>
             </div>
-            <Link href="/register" className="text-[#C974A6] font-bold hover:underline underline-offset-4">
+            <Link
+              href="/register"
+              className="text-[#C974A6] font-bold hover:underline underline-offset-4"
+            >
               View all masterpieces →
             </Link>
           </div>
@@ -97,7 +121,8 @@ export default function LandingPage() {
       <section className="mx-12 lg:mx-24 mb-24 p-12 rounded-[3rem] bg-[#C974A6] text-center text-white">
         <h2 className="text-5xl font-bold mb-6">Ready to share your art?</h2>
         <p className="text-xl opacity-90 mb-10 max-w-2xl mx-auto">
-          Join thousands of students and get constructive feedback in a toxicity-free environment.
+          Join thousands of students and get constructive feedback in a
+          toxicity-free environment.
         </p>
         <Link
           href="/register"
