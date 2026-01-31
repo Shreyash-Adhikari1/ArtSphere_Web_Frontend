@@ -1,15 +1,11 @@
-"use client"; // should be use client wirh using context
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-// import { useAuth } from "@/context/AuthContext";
 
 export default function LandingPage() {
-  // const { user } = useAuth();
-
   return (
     <div className="min-h-screen bg-white font-serif">
-      {/* {user && <div></div>} */}
-      {/* Navbar */}
       <nav className="flex justify-between items-center px-12 py-6">
         <h1 className="text-[#C974A6] text-3xl font-bold">ArtSphere</h1>
         <div className="space-x-8 text-black font-medium">
@@ -25,7 +21,6 @@ export default function LandingPage() {
         </div>
       </nav>
 
-      {/* Hero Section */}
       <main className="flex flex-col lg:flex-row items-center justify-between px-12 lg:px-24 py-16 gap-12">
         <div className="max-w-xl space-y-8">
           <h2 className="text-7xl font-bold leading-tight text-black">
@@ -52,12 +47,11 @@ export default function LandingPage() {
           </div>
         </div>
 
-        {/* Hero Illustration */}
         <div className="relative">
           <div className="w-[500px] h-[500px] rounded-full bg-[#FFF6ED] flex items-center justify-center border-2 border-[#F3E8EE]">
             <Image
               src="/images/artsphere_logo.png"
-              alt=""
+              alt="ArtSphere"
               width={450}
               height={450}
               className="object-contain p-8"
@@ -66,7 +60,7 @@ export default function LandingPage() {
           </div>
         </div>
       </main>
-      {/* Live Preview / Gallery Section */}
+
       <section className="py-24 bg-white">
         <div className="max-w-7xl mx-auto px-12">
           <div className="flex justify-between items-end mb-12">
@@ -86,7 +80,6 @@ export default function LandingPage() {
             </Link>
           </div>
 
-          {/* Art Grid */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {[1, 2, 3].map((item) => (
               <div
@@ -95,7 +88,7 @@ export default function LandingPage() {
               >
                 <div className="relative aspect-square w-full overflow-hidden rounded-[1.5rem] bg-white mb-4">
                   <Image
-                    src={`/images/preview-${item}.png`} // Ensure you have preview-1.png, etc.
+                    src="/images/artsphere_logo.png"
                     alt="Art Preview"
                     fill
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
@@ -117,7 +110,6 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* Call to Action Bar */}
       <section className="mx-12 lg:mx-24 mb-24 p-12 rounded-[3rem] bg-[#C974A6] text-center text-white">
         <h2 className="text-5xl font-bold mb-6">Ready to share your art?</h2>
         <p className="text-xl opacity-90 mb-10 max-w-2xl mx-auto">
@@ -132,7 +124,6 @@ export default function LandingPage() {
         </Link>
       </section>
 
-      {/* Small Footer/Feature bar */}
       <div className="bg-[#F3E8EE] py-10 mt-12">
         <div className="flex justify-around max-w-6xl mx-auto text-[#C974A6] font-bold">
           <p>✓ Student Verified</p>
