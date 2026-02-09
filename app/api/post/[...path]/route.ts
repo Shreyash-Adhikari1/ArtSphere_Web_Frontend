@@ -1,3 +1,4 @@
+import { getAuthToken } from "@/lib/cookie";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -14,7 +15,8 @@ async function proxy(req: Request, path: string[]) {
 
   // 1. Read the httpOnly auth cookie
   //    This ONLY works on the server.
-  const token = (await cookies()).get("auth_token")?.value;
+  // const token = (await cookies()).get("auth_token")?.value;
+  const token = await getAuthToken();
 
   // 2. If no token, stop early
   //    Backend expects Bearer token, so calling it without one is pointless.

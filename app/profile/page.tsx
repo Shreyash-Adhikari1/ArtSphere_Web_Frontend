@@ -237,7 +237,7 @@ function Stat({ label, value }: { label: string; value: number }) {
 function Tab({ icon, active }: { icon: React.ReactNode; active?: boolean }) {
   return (
     <div
-      className={`py-4 border-t-2 -mt-[1px] cursor-pointer ${
+      className={`py-4 border-t-2 -mt-1px cursor-pointer ${
         active ? "border-black text-black" : "border-transparent text-gray-400"
       }`}
     >
