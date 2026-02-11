@@ -1,10 +1,10 @@
-import { cookies } from "next/headers";
+import { getAuthToken } from "@/lib/cookie";
 import { NextResponse } from "next/server";
 
 const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
 async function forward(req: Request, params: { path: string[] }) {
-  const token = (await cookies()).get("auth_token")?.value;
+  const token = await getAuthToken();
 
   if (!token) {
     return NextResponse.json(
