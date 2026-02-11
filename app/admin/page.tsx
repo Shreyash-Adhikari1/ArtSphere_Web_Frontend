@@ -26,9 +26,11 @@ type AdminUser = {
 
 type AdminPost = {
   _id: string;
-  image?: string;
-  user?: string | { _id: string; username?: string };
-  createdAt?: string;
+  media?: string;
+  mediaType?: "image" | "video";
+  isChallengeSubmission?: boolean;
+  likeCount?: number;
+  commentCount?: number;
 };
 
 const UPLOAD_PROFILE_DIR = "/uploads/profile-image";
@@ -41,6 +43,8 @@ export default function AdminPage() {
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [usersLoading, setUsersLoading] = useState(true);
   const [userError, setUserError] = useState("");
+  const [editingUser, setEditingUser] = useState<AdminUser | null>(null);
+  const [editLoading, setEditLoading] = useState(false);
 
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<"all" | "admin" | "user">("all");
@@ -55,6 +59,16 @@ export default function AdminPage() {
   const [posts, setPosts] = useState<AdminPost[]>([]);
   const [postsLoading, setPostsLoading] = useState(false);
   const [postError, setPostError] = useState("");
+
+  function resolvePostPath(post: AdminPost) {
+    if (!post.media) return null;
+
+    if (post.isChallengeSubmission) {
+      return `/uploads/challenge-submissions/${post.media}`;
+    }
+
+    return `/uploads/post-images/${post.media}`;
+  }
 
   async function fetchUsers() {
     setUsersLoading(true);
@@ -78,6 +92,33 @@ export default function AdminPage() {
       setUserError(e?.message || "Failed to load users");
     } finally {
       setUsersLoading(false);
+    }
+  }
+  async function updateUser(userId: string, payload: Partial<AdminUser>) {
+    setEditLoading(true);
+    try {
+      const res = await fetch(`/api/admin/users/edit/${userId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      const text = await res.text();
+      const data = safeJson(text);
+
+      if (!res.ok) {
+        alert(data?.message || "Update failed");
+        return;
+      }
+
+      setEditingUser(null);
+      await fetchUsers();
+
+      if (selectedUser?._id === userId) {
+        setSelectedUser({ ...selectedUser, ...payload });
+      }
+    } finally {
+      setEditLoading(false);
     }
   }
 
@@ -471,6 +512,12 @@ export default function AdminPage() {
 
                     <div className="flex gap-2 mb-6">
                       <button
+                        onClick={() => setEditingUser(selectedUser)}
+                        className="flex-1 rounded-full border border-gray-200 font-extrabold px-4 py-3 hover:bg-gray-50"
+                      >
+                        Edit user
+                      </button>
+                      <button
                         onClick={() => deleteUser(selectedUser._id)}
                         className="flex-1 rounded-full bg-[#C974A6] text-white font-extrabold px-4 py-3 hover:brightness-95 flex items-center justify-center gap-2"
                       >
@@ -502,25 +549,72 @@ export default function AdminPage() {
                       ) : selectedUserPosts.length === 0 ? (
                         <p className="text-gray-400">No posts found.</p>
                       ) : (
-                        <div className="grid grid-cols-3 gap-2">
-                          {selectedUserPosts.slice(0, 9).map((p) => (
-                            <button
-                              key={p._id}
-                              onClick={() => deletePost(p._id)}
-                              className="aspect-square rounded-xl overflow-hidden bg-gray-100 border hover:opacity-90"
-                              title="Click to delete post"
-                            >
-                              <img
-                                src={
-                                  p.image
-                                    ? `/api/image?path=${encodeURIComponent(`${UPLOAD_POST_DIR}/${p.image}`)}`
-                                    : "/default-avatar.jpg"
-                                }
-                                className="w-full h-full object-cover"
-                                alt="post"
-                              />
-                            </button>
-                          ))}
+                        <div className="relative">
+                          {/* Left arrow */}
+                          <button
+                            onClick={() => {
+                              const el =
+                                document.getElementById("user-post-scroll");
+                              el?.scrollBy({ left: -300, behavior: "smooth" });
+                            }}
+                            className="absolute -left-4 top-1/2 -translate-y-1/2 z-10 bg-white border rounded-full p-1 shadow hover:bg-gray-100"
+                          >
+                            ◀
+                          </button>
+
+                          {/* Right arrow */}
+                          <button
+                            onClick={() => {
+                              const el =
+                                document.getElementById("user-post-scroll");
+                              el?.scrollBy({ left: 300, behavior: "smooth" });
+                            }}
+                            className="absolute -right-4 top-1/2 -translate-y-1/2 z-10 bg-white border rounded-full p-1 shadow hover:bg-gray-100"
+                          >
+                            ▶
+                          </button>
+
+                          {/* Scroll container */}
+                          <div
+                            id="user-post-scroll"
+                            className="flex gap-3 overflow-x-auto scroll-smooth snap-x snap-mandatory pb-2 scrollbar-hide"
+                          >
+                            {selectedUserPosts.map((p) => {
+                              const path = resolvePostPath(p);
+
+                              return (
+                                <button
+                                  key={p._id}
+                                  onClick={() => deletePost(p._id)}
+                                  title="Click to delete post"
+                                  className="relative shrink-0 w-24 h-24 rounded-xl overflow-hidden bg-gray-100 border snap-start group"
+                                >
+                                  {path ? (
+                                    <img
+                                      src={`/api/image?path=${encodeURIComponent(path)}`}
+                                      alt="post"
+                                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                                      onError={(e) => {
+                                        e.currentTarget.src =
+                                          "/images/artsphere_logo.png";
+                                      }}
+                                    />
+                                  ) : (
+                                    <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">
+                                      No media
+                                    </div>
+                                  )}
+
+                                  {/* Delete overlay */}
+                                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                                    <span className="text-white text-xs font-semibold">
+                                      Delete
+                                    </span>
+                                  </div>
+                                </button>
+                              );
+                            })}
+                          </div>
                         </div>
                       )}
 
@@ -566,8 +660,8 @@ export default function AdminPage() {
                     >
                       <img
                         src={
-                          p.image
-                            ? `/api/image?path=${encodeURIComponent(`${UPLOAD_POST_DIR}/${p.image}`)}`
+                          p.media
+                            ? `/api/image?path=${encodeURIComponent(`${UPLOAD_POST_DIR}/${p.media}`)}`
                             : "/default-avatar.jpg"
                         }
                         className="w-full h-full object-cover"
@@ -588,6 +682,70 @@ export default function AdminPage() {
               )}
             </div>
           </section>
+        )}
+        {editingUser && (
+          <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center">
+            <div className="bg-white rounded-3xl w-full max-w-md p-6 shadow-xl">
+              <h3 className="text-xl font-extrabold mb-4">Edit user</h3>
+
+              <div className="space-y-4">
+                <input
+                  defaultValue={editingUser.username}
+                  placeholder="Username"
+                  className="w-full rounded-xl border px-4 py-2"
+                  onChange={(e) =>
+                    setEditingUser({ ...editingUser, username: e.target.value })
+                  }
+                />
+
+                <input
+                  defaultValue={editingUser.fullName}
+                  placeholder="Full name"
+                  className="w-full rounded-xl border px-4 py-2"
+                  onChange={(e) =>
+                    setEditingUser({ ...editingUser, fullName: e.target.value })
+                  }
+                />
+
+                <select
+                  value={editingUser.role}
+                  onChange={(e) =>
+                    setEditingUser({
+                      ...editingUser,
+                      role: e.target.value as "admin" | "user",
+                    })
+                  }
+                  className="w-full rounded-xl border px-4 py-2 font-bold"
+                >
+                  <option value="user">User</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+
+              <div className="flex gap-3 mt-6">
+                <button
+                  onClick={() => setEditingUser(null)}
+                  className="flex-1 rounded-full border px-4 py-2 font-bold"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  disabled={editLoading}
+                  onClick={() =>
+                    updateUser(editingUser._id, {
+                      username: editingUser.username,
+                      fullName: editingUser.fullName,
+                      role: editingUser.role,
+                    })
+                  }
+                  className="flex-1 rounded-full bg-[#C974A6] text-white px-4 py-2 font-bold disabled:opacity-60"
+                >
+                  {editLoading ? "Saving…" : "Save changes"}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
       </main>
     </div>

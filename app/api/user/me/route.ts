@@ -1,11 +1,12 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { API } from "@/lib/api/endpoints";
+import { getAuthToken } from "@/lib/cookie";
 
 export async function GET() {
   const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
-  const token = (await cookies()).get("auth_token")?.value;
+  const token = await getAuthToken();
   if (!token) {
     return NextResponse.json(
       { success: false, message: "No token" },
