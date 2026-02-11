@@ -321,7 +321,7 @@ export default function AdminPage() {
             <div className="lg:col-span-3 rounded-3xl border border-gray-200 bg-white shadow-sm">
               <div className="p-5 border-b flex flex-col md:flex-row md:items-center md:justify-between gap-3">
                 <div className="flex items-center gap-3 w-full md:w-auto">
-                  <div className="flex items-center gap-2 bg-[#F3E8EE] rounded-full px-4 py-2 w-full md:w-[360px]">
+                  <div className="flex items-center gap-2 bg-[#F3E8EE] rounded-full px-4 py-2 w-full md:w-90">
                     <Search size={16} className="text-gray-500" />
                     <input
                       value={search}
@@ -776,7 +776,7 @@ function TabBtn({
   return (
     <button
       onClick={onClick}
-      className={`py-4 border-t-2 -mt-[1px] font-extrabold flex items-center gap-2 transition ${
+      className={`py-4 border-t-2 -mt-px font-extrabold flex items-center gap-2 transition ${
         active
           ? "border-black text-black"
           : "border-transparent text-gray-400 hover:text-black"
