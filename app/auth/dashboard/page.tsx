@@ -6,7 +6,7 @@ import { Heart, MessageCircle, Bookmark } from "lucide-react";
 
 type Post = {
   _id: string;
-  author?: { username?: string };
+  author?: { username?: string; avatar?: string };
   media?: string;
   mediaType?: string;
   caption?: string;
@@ -15,11 +15,14 @@ type Post = {
   isChallengeSubmission?: boolean;
   createdAt?: string;
 
-  // Optional: if your backend ever sends these, we'll use them automatically
-  likedByMe?: boolean;
-  isLiked?: boolean;
+  // I might add these later
+  // likedByMe?: boolean;
+  // isLiked?: boolean;
 };
 
+// Backend Sends Two different ids for two different types of post
+// One is regular post and the other is a post created  for challenge submission
+// so we handle that using this media resolver function for that fetch bit
 function resolveMediaUrl(
   base: string,
   post: { media?: string; isChallengeSubmission?: boolean },
@@ -37,6 +40,22 @@ function resolveMediaUrl(
     return `${base}/uploads/challenge-submissions/${media}`;
   }
   return `${base}/uploads/post-images/${media}`;
+}
+
+// This finctionis here to get the user avatar from backend
+// I just call this in the post card
+function resolveAvatarUrl(base: string, avatar?: string) {
+  if (!avatar) return "/images/default-avatar.png";
+
+  if (avatar.startsWith("http://") || avatar.startsWith("https://")) {
+    return avatar;
+  }
+
+  if (avatar.startsWith("/uploads/")) {
+    return `${base}${avatar}`;
+  }
+
+  return `${base}/uploads/profile-image/${avatar}`;
 }
 
 export default function HomePage() {
@@ -199,6 +218,7 @@ export default function HomePage() {
             posts.map((post) => {
               const username = post.author?.username ?? "artist";
               const mediaUrl = resolveMediaUrl(BASE, post);
+              const avatarUrl = resolveAvatarUrl(BASE, post.author?.avatar);
               const liked = !!likedMap[post._id];
               const disabled = !!pendingLike[post._id];
 
@@ -208,23 +228,36 @@ export default function HomePage() {
                   className="bg-[#FFF6ED] rounded-3xl p-6 shadow-sm border border-orange-50"
                 >
                   <div className="flex justify-between items-center mb-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm text-black">
-                        @{username}
-                      </span>
-                      <span className="text-gray-400 text-xs">
-                        {post.createdAt
-                          ? new Date(post.createdAt).toLocaleString()
-                          : ""}
-                      </span>
+                    <div className="flex items-center gap-3">
+                      {/* Avatar */}
+                      <img
+                        src={avatarUrl}
+                        alt={`${username} avatar`}
+                        className="w-9 h-9 rounded-full object-cover border border-gray-200"
+                        onError={(e) => {
+                          e.currentTarget.src = "/images/default-avatar.png";
+                        }}
+                      />
+
+                      {/* Name + time */}
+                      <div className="flex flex-col">
+                        <span className="font-bold text-sm text-black">
+                          @{username}
+                        </span>
+                        <span className="text-gray-400 text-xs">
+                          {post.createdAt
+                            ? new Date(post.createdAt).toLocaleString()
+                            : ""}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="relative w-full aspect-[16/9] rounded-2xl overflow-hidden mb-4 border border-gray-100 bg-white">
+                  <div className="relative w-full aspect-4/3 rounded-2xl overflow-hidden mb-4 border border-gray-100 bg-white">
                     <img
                       src={mediaUrl}
                       alt="Post content"
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-contain"
                       onError={(e) => {
                         e.currentTarget.src = "/images/artsphere_logo.png";
                       }}
