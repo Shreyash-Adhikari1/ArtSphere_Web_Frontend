@@ -209,7 +209,7 @@ export default function HomePage() {
           <button className="pb-2 text-gray-400">Following</button>
         </div>
 
-        <h2 className="text-xl font-bold mb-6">Trending Posts</h2>
+        <h2 className="text-xl font-bold mb-6 text-black">Trending Posts</h2>
 
         <div className="space-y-8">
           {posts.length === 0 ? (

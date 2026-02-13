@@ -147,7 +147,7 @@ export default function ProfilePage() {
               @{user.username}
             </h2>
 
-            <div className="flex gap-12">
+            <div className="flex gap-12 text-black">
               <Stat label="posts" value={user.postCount} />
               <Stat label="following" value={user.followingCount} />
               <Stat label="followers" value={user.followerCount} />

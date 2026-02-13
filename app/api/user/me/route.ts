@@ -30,28 +30,46 @@ export async function GET() {
 
 export async function PATCH(req: Request) {
   const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
-  const token = (await cookies()).get("auth_token")?.value;
+  const token = await getAuthToken();
+
   if (!token) {
     return NextResponse.json(
-      { success: false, message: "No token" },
+      { success: false, message: "Unauthorized" },
       { status: 401 },
     );
   }
 
-  // Receive multipart/form-data from the browser
-  const formData = await req.formData();
+  const contentType = req.headers.get("content-type") || "";
+  const isMultipart = contentType.includes("multipart/form-data");
 
-  // Forward to backend (DO NOT set Content-Type manually)
+  let body: BodyInit | undefined;
+
+  if (isMultipart) {
+    // Image + fields
+    body = await req.formData();
+  } else {
+    // JSON-only update (no image)
+    body = await req.text();
+  }
+
+  const headers: Record<string, string> = {
+    Authorization: `Bearer ${token}`,
+  };
+
+  // IMPORTANT: do NOT set content-type for multipart
+  if (!isMultipart && contentType) {
+    headers["Content-Type"] = contentType;
+  }
+
   const res = await fetch(`${BASE}${API.USER.ME}`, {
     method: "PATCH",
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-    body: formData,
+    headers,
+    body,
     cache: "no-store",
   });
 
   const text = await res.text();
+
   return new NextResponse(text, {
     status: res.status,
     headers: {
