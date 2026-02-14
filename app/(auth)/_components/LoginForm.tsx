@@ -100,7 +100,7 @@ export default function LoginForm() {
             </button>
 
             <Link
-              href="#"
+              href="/request-password-reset"
               className="text-[#FF0000] text-sm font-bold hover:underline"
             >
               forgot your password?
@@ -117,7 +117,7 @@ export default function LoginForm() {
 
         {/* Right Side: Illustration */}
         <div className="hidden lg:block relative">
-          <div className="w-[450px] h-[450px] rounded-full overflow-hidden border-2 border-gray-100 flex items-center justify-center">
+          <div className="w-112.5 h-112.5 rounded-full overflow-hidden border-2 border-gray-100 flex items-center justify-center">
             <Image
               src="/images/artsphere_logo.png"
               alt="ArtSphere Illustration"

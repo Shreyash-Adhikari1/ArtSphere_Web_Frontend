@@ -12,8 +12,12 @@ export default function Sidebar() {
 
   const menuItems = [
     { icon: <Home size={24} />, label: "Home", href: "/auth/dashboard" },
-    { icon: <PlusSquare size={24} />, label: "Create", href: "/create" },
-    { icon: <Puzzle size={24} />, label: "Challenges", href: "/challenges" },
+    {
+      icon: <PlusSquare size={24} />,
+      label: "Create",
+      href: "/post/create-post",
+    },
+    { icon: <Puzzle size={24} />, label: "Challenges", href: "/challenge" },
     { icon: <User size={24} />, label: "Profile", href: "/profile" },
     {
       icon: <Bell size={24} />,

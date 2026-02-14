@@ -11,9 +11,6 @@ export async function GET(req: Request) {
       { status: 400 },
     );
   }
-
-  // Optional: if you want to REQUIRE login to view images via proxy
-  // (even though /uploads is public)
   const token = (await cookies()).get("auth_token")?.value;
   if (!token) {
     return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
@@ -22,8 +19,7 @@ export async function GET(req: Request) {
   const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
   const res = await fetch(`${BASE}${path}`, {
-    // If your /uploads is public, you can remove Authorization entirely.
-    // Keeping it doesn't hurt if backend ignores it.
+    // Keeping Authorization doesn't hurt if backend ignores it.
     headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
