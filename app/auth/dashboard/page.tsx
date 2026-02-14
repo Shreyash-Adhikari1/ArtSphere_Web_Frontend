@@ -1,12 +1,14 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/app/(public)/_components/Sidebar";
 import { Heart, MessageCircle, Bookmark } from "lucide-react";
+import { useRouter } from "next/navigation";
+import CommentsModal from "@/app/(public)/_components/CommentsModal";
 
 type Post = {
   _id: string;
-  author?: { username?: string; avatar?: string };
+  author?: { _id?: string; username?: string; avatar?: string };
   media?: string;
   mediaType?: string;
   caption?: string;
@@ -14,15 +16,8 @@ type Post = {
   commentCount?: number;
   isChallengeSubmission?: boolean;
   createdAt?: string;
-
-  // I might add these later
-  // likedByMe?: boolean;
-  // isLiked?: boolean;
 };
 
-// Backend Sends Two different ids for two different types of post
-// One is regular post and the other is a post created  for challenge submission
-// so we handle that using this media resolver function for that fetch bit
 function resolveMediaUrl(
   base: string,
   post: { media?: string; isChallengeSubmission?: boolean },
@@ -42,8 +37,6 @@ function resolveMediaUrl(
   return `${base}/uploads/post-images/${media}`;
 }
 
-// This finctionis here to get the user avatar from backend
-// I just call this in the post card
 function resolveAvatarUrl(base: string, avatar?: string) {
   if (!avatar) return "/images/default-avatar.png";
 
@@ -61,13 +54,17 @@ function resolveAvatarUrl(base: string, avatar?: string) {
 export default function HomePage() {
   const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
 
+  const router = useRouter();
   const [posts, setPosts] = useState<Post[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Track like state locally (so UI is responsive even if backend doesn't return likedByMe)
+  // likes
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
   const [pendingLike, setPendingLike] = useState<Record<string, boolean>>({});
+
+  // comments modal
+  const [activePostId, setActivePostId] = useState<string | null>(null);
 
   useEffect(() => {
     async function loadFeed() {
@@ -75,7 +72,6 @@ export default function HomePage() {
         setLoading(true);
         setError("");
 
-        // ✅ Uses your Next proxy: /api/post/[...path]
         const res = await fetch("/api/post/posts", { cache: "no-store" });
         const data = await res.json();
 
@@ -86,10 +82,9 @@ export default function HomePage() {
         const list: Post[] = data.posts ?? data.data ?? [];
         setPosts(list);
 
-        // Initialize liked state if backend provides a boolean
         const initial: Record<string, boolean> = {};
         for (const p of list) {
-          const liked = (p as any).likedByMe ?? (p as any).isLiked ?? false; // fallback
+          const liked = (p as any).likedByMe ?? (p as any).isLiked ?? false;
           initial[p._id] = !!liked;
         }
         setLikedMap(initial);
@@ -104,12 +99,10 @@ export default function HomePage() {
   }, []);
 
   async function toggleLike(postId: string) {
-    // Prevent double taps while request in-flight
     if (pendingLike[postId]) return;
 
     const currentlyLiked = !!likedMap[postId];
 
-    // --- optimistic UI update ---
     setLikedMap((m) => ({ ...m, [postId]: !currentlyLiked }));
     setPosts((prev) =>
       prev.map((p) =>
@@ -128,15 +121,12 @@ export default function HomePage() {
     setPendingLike((m) => ({ ...m, [postId]: true }));
 
     try {
-      // ✅ Calls your Next proxy -> backend:
-      // POST /api/post/like/:postId OR /api/post/unlike/:postId
       const endpoint = currentlyLiked
         ? `/api/post/unlike/${postId}`
         : `/api/post/like/${postId}`;
 
       const res = await fetch(endpoint, { method: "POST" });
 
-      // Some backends return JSON, some return only message. We handle both safely.
       const text = await res.text();
       let data: any = null;
       try {
@@ -148,11 +138,7 @@ export default function HomePage() {
       if (!res.ok || data?.success === false) {
         throw new Error(data?.message || `Failed (${res.status})`);
       }
-
-      // Optional: if backend returns fresh counts, you can sync here
-      // Example: if (data.post?.likeCount != null) { ... }
     } catch (e: any) {
-      // --- revert optimistic update on failure ---
       setLikedMap((m) => ({ ...m, [postId]: currentlyLiked }));
       setPosts((prev) =>
         prev.map((p) =>
@@ -172,6 +158,20 @@ export default function HomePage() {
     } finally {
       setPendingLike((m) => ({ ...m, [postId]: false }));
     }
+  }
+
+  // called by CommentsModal on create/delete
+  function applyCommentDelta(postId: string, delta: number) {
+    setPosts((prev) =>
+      prev.map((p) =>
+        p._id === postId
+          ? {
+              ...p,
+              commentCount: Math.max(0, (p.commentCount ?? 0) + delta),
+            }
+          : p,
+      ),
+    );
   }
 
   if (loading) {
@@ -201,7 +201,6 @@ export default function HomePage() {
       <Sidebar />
 
       <main className="flex-1 p-8 max-w-4xl mx-auto font-serif">
-        {/* Top Navigation */}
         <div className="flex gap-8 border-b border-gray-100 mb-6">
           <button className="pb-2 border-b-2 border-black font-bold">
             Discover
@@ -228,8 +227,13 @@ export default function HomePage() {
                   className="bg-[#FFF6ED] rounded-3xl p-6 shadow-sm border border-orange-50"
                 >
                   <div className="flex justify-between items-center mb-4">
-                    <div className="flex items-center gap-3">
-                      {/* Avatar */}
+                    <div
+                      className="flex items-center gap-3 cursor-pointer"
+                      onClick={() => {
+                        if (post.author?._id)
+                          router.push(`/user/${post.author._id}`);
+                      }}
+                    >
                       <img
                         src={avatarUrl}
                         alt={`${username} avatar`}
@@ -239,9 +243,8 @@ export default function HomePage() {
                         }}
                       />
 
-                      {/* Name + time */}
                       <div className="flex flex-col">
-                        <span className="font-bold text-sm text-black">
+                        <span className="font-bold text-sm text-black hover:underline">
                           @{username}
                         </span>
                         <span className="text-gray-400 text-xs">
@@ -271,7 +274,6 @@ export default function HomePage() {
                   )}
 
                   <div className="flex justify-between items-center">
-                    {/* Left actions: Like + Comment */}
                     <div className="flex items-center gap-5">
                       <button
                         type="button"
@@ -296,10 +298,7 @@ export default function HomePage() {
                         type="button"
                         className="flex items-center gap-2"
                         aria-label="Comments"
-                        onClick={() => {
-                          // later you can open comments modal or navigate
-                          console.log("Open comments for", post._id);
-                        }}
+                        onClick={() => setActivePostId(post._id)}
                       >
                         <MessageCircle size={20} className="text-black" />
                         <span className="text-sm font-bold text-black">
@@ -308,9 +307,20 @@ export default function HomePage() {
                       </button>
                     </div>
 
-                    {/* Right action: Bookmark */}
                     <Bookmark className="text-black cursor-pointer" size={20} />
                   </div>
+
+                  {/* Comments Modal */}
+                  {activePostId === post._id && (
+                    <CommentsModal
+                      postId={post._id}
+                      open={true}
+                      onClose={() => setActivePostId(null)}
+                      onCommentCountDelta={(delta) =>
+                        applyCommentDelta(post._id, delta)
+                      }
+                    />
+                  )}
                 </div>
               );
             })
