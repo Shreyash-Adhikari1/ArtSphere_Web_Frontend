@@ -17,7 +17,7 @@ export default function Sidebar() {
       label: "Create",
       href: "/post/create-post",
     },
-    { icon: <Puzzle size={24} />, label: "Challenges", href: "/challenge" },
+    { icon: <Puzzle size={24} />, label: "Challenges", href: "/challenges" },
     { icon: <User size={24} />, label: "Profile", href: "/profile" },
     {
       icon: <Bell size={24} />,

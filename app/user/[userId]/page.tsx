@@ -2,8 +2,11 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams } from "next/navigation";
-import { Grid, Heart, Bookmark, X } from "lucide-react";
+import { Grid, Heart, Bookmark } from "lucide-react";
 import Sidebar from "../../(public)/_components/Sidebar";
+import FollowersFollowingModal from "@/app/(auth)/_components/FollowersFollowingModal";
+import PostGrid, { type GridPost } from "@/app/(auth)/_components/PostGrid";
+import PostDetailsModal from "@/app/(auth)/_components/PostDetailsModal";
 
 /* ---------- Types ---------- */
 
@@ -18,92 +21,7 @@ type User = {
   followerCount: number;
 };
 
-type Post = {
-  _id: string;
-  media?: string;
-  isChallengeSubmission?: boolean;
-  likeCount?: number;
-  commentCount?: number;
-};
-
-type SimpleUser = {
-  _id: string;
-  username?: string;
-  fullName?: string;
-  avatar?: string;
-};
-
-/* ---------- Helpers ---------- */
-
-function resolvePostPath(post: Post) {
-  if (!post.media) return null;
-  if (post.isChallengeSubmission)
-    return `/uploads/challenge-submissions/${post.media}`;
-  return `/uploads/post-images/${post.media}`;
-}
-
-function extractArray(data: any) {
-  if (!data) return [];
-  if (Array.isArray(data)) return data;
-
-  const candidates = [
-    data.following,
-    data.followers,
-    data.users,
-    data.data,
-    data.result,
-    data.items,
-    data.list,
-  ];
-
-  for (const c of candidates) if (Array.isArray(c)) return c;
-  return [];
-}
-
-function normalizeUsers(list: any[]): SimpleUser[] {
-  return list
-    .map((item: any) => {
-      if (!item) return null;
-
-      // direct user object
-      if (item._id && (item.username || item.fullName || item.avatar)) {
-        return {
-          _id: String(item._id),
-          username: item.username,
-          fullName: item.fullName,
-          avatar: item.avatar,
-        };
-      }
-
-      // follow doc: follower populated
-      if (item.follower && item.follower._id) {
-        return {
-          _id: String(item.follower._id),
-          username: item.follower.username,
-          fullName: item.follower.fullName,
-          avatar: item.follower.avatar,
-        };
-      }
-
-      // follow doc: following populated
-      if (item.following && item.following._id) {
-        return {
-          _id: String(item.following._id),
-          username: item.following.username,
-          fullName: item.following.fullName,
-          avatar: item.following.avatar,
-        };
-      }
-
-      // if only IDs are present
-      if (item._id) return { _id: String(item._id) };
-      if (item.follower) return { _id: String(item.follower) };
-      if (item.following) return { _id: String(item.following) };
-
-      return null;
-    })
-    .filter(Boolean) as SimpleUser[];
-}
+type Post = GridPost;
 
 /* ---------- Page ---------- */
 
@@ -118,12 +36,13 @@ export default function UserProfilePage() {
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
 
-  // Instagram-ish modal
+  // shared modal state
   const [listOpen, setListOpen] = useState<null | "followers" | "following">(
     null,
   );
-  const [listLoading, setListLoading] = useState(false);
-  const [listUsers, setListUsers] = useState<SimpleUser[]>([]);
+
+  // post modal
+  const [activePost, setActivePost] = useState<Post | null>(null);
 
   // Prevent double submit / race clicks
   const followReqInFlight = useRef(false);
@@ -144,7 +63,7 @@ export default function UserProfilePage() {
     if (res.ok && data.posts) setPosts(data.posts);
   }
 
-  /* ---- Follow status (uses your NEW backend endpoint) ---- */
+  /* ---- Follow status ---- */
   async function loadFollowStatus() {
     const res = await fetch(`/api/follow/is-following/${safeUserId}`, {
       cache: "no-store",
@@ -157,28 +76,6 @@ export default function UserProfilePage() {
 
     const data = await res.json();
     setIsFollowing(!!data.isFollowing);
-  }
-
-  /* ---- Followers / Following list (for viewed user) ---- */
-  async function openList(kind: "followers" | "following") {
-    setListOpen(kind);
-    setListLoading(true);
-    setListUsers([]);
-
-    const endpoint =
-      kind === "followers"
-        ? `/api/follow/${safeUserId}/followers`
-        : `/api/follow/${safeUserId}/following`;
-
-    const res = await fetch(endpoint, { cache: "no-store" });
-    const data = await res.json();
-
-    if (res.ok) {
-      const raw = extractArray(data);
-      setListUsers(normalizeUsers(raw));
-    }
-
-    setListLoading(false);
   }
 
   /* ---- Toggle follow/unfollow ---- */
@@ -204,16 +101,6 @@ export default function UserProfilePage() {
       };
     });
 
-    // If followers modal is open, reflect change instantly (Instagram-ish)
-    if (listOpen === "followers") {
-      if (wasFollowing) {
-        // if you unfollow someone, THEY lose you as follower? Actually no — unfollow means YOU stop following THEM.
-        // Followers of the viewed user decreases by 1 (you were a follower). So remove "me" if present.
-        // We don't know current user id here, so we won't manipulate listUsers blindly.
-        // We'll just refetch list after request succeeds.
-      }
-    }
-
     const endpoint = wasFollowing
       ? `/api/follow/unfollow/${safeUserId}`
       : `/api/follow/follow/${safeUserId}`;
@@ -236,11 +123,6 @@ export default function UserProfilePage() {
     } else {
       // Sync real truth
       await Promise.all([loadProfile(), loadFollowStatus()]);
-
-      // If modal is open, refresh it so it matches backend
-      if (listOpen) {
-        await openList(listOpen);
-      }
     }
 
     setFollowLoading(false);
@@ -304,7 +186,7 @@ export default function UserProfilePage() {
               <Stat label="posts" value={user.postCount} />
 
               <button
-                onClick={() => openList("following")}
+                onClick={() => setListOpen("following")}
                 className="text-left hover:opacity-80 transition"
                 type="button"
               >
@@ -312,7 +194,7 @@ export default function UserProfilePage() {
               </button>
 
               <button
-                onClick={() => openList("followers")}
+                onClick={() => setListOpen("followers")}
                 className="text-left hover:opacity-80 transition"
                 type="button"
               >
@@ -351,104 +233,39 @@ export default function UserProfilePage() {
         </div>
 
         {/* Posts grid */}
-        <div className="grid grid-cols-3 gap-2 md:gap-4">
-          {posts.length > 0 ? (
-            posts.map((post) => {
-              const path = resolvePostPath(post);
-
-              return (
-                <div
-                  key={post._id}
-                  className="relative aspect-square bg-gray-100 overflow-hidden"
-                >
-                  {path && (
-                    <img
-                      src={`/api/image?path=${encodeURIComponent(path)}`}
-                      className="w-full h-full object-cover"
-                      alt="post"
-                    />
-                  )}
-                </div>
-              );
-            })
-          ) : (
-            <div className="col-span-3 text-center py-20 text-gray-400 italic">
-              No posts yet
-            </div>
-          )}
-        </div>
+        <PostGrid
+          posts={posts}
+          showHoverOverlay={false}
+          onPostClick={(p) => setActivePost(p as Post)}
+        />
       </main>
 
-      {/* Followers/Following Modal */}
-      {listOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          {/* backdrop */}
-          <button
-            className="absolute inset-0 bg-black/40"
-            onClick={() => setListOpen(null)}
-            aria-label="Close"
-            type="button"
-          />
+      {/* Shared Followers/Following Modal */}
+      <FollowersFollowingModal
+        open={listOpen !== null}
+        kind={listOpen ?? "followers"}
+        userId={safeUserId}
+        onClose={() => setListOpen(null)}
+      />
 
-          {/* modal */}
-          <div className="relative w-[92%] max-w-md bg-white rounded-2xl shadow-xl border overflow-hidden">
-            <div className="flex items-center justify-between px-5 py-4 border-b">
-              <h3 className="font-bold text-lg">
-                {listOpen === "followers" ? "Followers" : "Following"}
-              </h3>
-              <button
-                onClick={() => setListOpen(null)}
-                className="p-2 rounded-full hover:bg-gray-100 transition"
-                type="button"
-              >
-                <X size={18} />
-              </button>
-            </div>
-
-            <div className="max-h-[60vh] overflow-auto">
-              {listLoading ? (
-                <div className="py-10 text-center text-gray-400">Loading…</div>
-              ) : listUsers.length > 0 ? (
-                <div className="divide-y">
-                  {listUsers.map((u) => (
-                    <div
-                      key={u._id}
-                      className="flex items-center gap-3 px-5 py-4"
-                    >
-                      <div className="w-10 h-10 rounded-full overflow-hidden bg-gray-100 border">
-                        <img
-                          src={
-                            u.avatar
-                              ? `/api/image?path=${encodeURIComponent(
-                                  `/uploads/profile-image/${u.avatar}`,
-                                )}`
-                              : "/images/artsphere_logo.png"
-                          }
-                          className="w-full h-full object-cover"
-                          alt="avatar"
-                        />
-                      </div>
-
-                      <div className="leading-tight">
-                        <p className="font-semibold text-sm">
-                          {u.username ? `@${u.username}` : "Unknown user"}
-                        </p>
-                        {u.fullName && (
-                          <p className="text-xs text-gray-500">{u.fullName}</p>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="py-10 text-center text-gray-400 italic">
-                  No {listOpen} yet
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Post details modal (no delete here) */}
+      <PostDetailsModal
+        open={!!activePost}
+        post={activePost}
+        canDelete={false}
+        onClose={() => setActivePost(null)}
+        onDeleted={() => {}}
+        onPostUpdated={(updated) => {
+          setPosts((prev) =>
+            prev.map((p) => (p._id === updated._id ? { ...p, ...updated } : p)),
+          );
+          setActivePost((prev) =>
+            prev && prev._id === updated._id
+              ? ({ ...prev, ...updated } as any)
+              : prev,
+          );
+        }}
+      />
     </div>
   );
 }
