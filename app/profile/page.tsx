@@ -3,10 +3,14 @@
 import { useEffect, useState } from "react";
 import { Settings, Grid, Heart, Bookmark } from "lucide-react";
 import Sidebar from "../(public)/_components/Sidebar";
+import FollowersFollowingModal from "@/app/(auth)/_components/FollowersFollowingModal";
+import PostGrid, { type GridPost } from "@/app/(auth)/_components/PostGrid";
+import PostDetailsModal from "@/app/(auth)/_components/PostDetailsModal";
 
 /* ---------- Types ---------- */
 
 type User = {
+  _id: string; // IMPORTANT (needed for /api/follow/:userId/..)
   username: string;
   fullName: string;
   bio?: string;
@@ -16,32 +20,21 @@ type User = {
   followerCount: number;
 };
 
-type Post = {
-  _id: string;
-  media?: string;
+type Post = GridPost & {
   mediaType?: "image" | "video";
-  isChallengeSubmission?: boolean;
-  likeCount?: number;
-  commentCount?: number;
 };
-
-/* ---------- Helpers ---------- */
-
-function resolvePostPath(post: Post) {
-  if (!post.media) return null;
-
-  if (post.isChallengeSubmission) {
-    return `/uploads/challenge-submissions/${post.media}`;
-  }
-
-  return `/uploads/post-images/${post.media}`;
-}
 
 /* ---------- Page ---------- */
 
 export default function ProfilePage() {
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
+  const [activePost, setActivePost] = useState<Post | null>(null);
+
+  const [listOpen, setListOpen] = useState<null | "followers" | "following">(
+    null,
+  );
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -55,7 +48,11 @@ export default function ProfilePage() {
         throw new Error(data?.message || "Failed to load profile");
       }
 
-      setUser(data.user || data.data || data);
+      const u = data.user || data.data || data;
+
+      // If your backend doesn't return _id, this will fail the modal.
+      // Best fix: ensure /api/user/me returns _id.
+      setUser(u);
     } catch (e: any) {
       setError(e.message || "Failed to load profile");
     }
@@ -131,12 +128,12 @@ export default function ProfilePage() {
                   ? `/api/image?path=${encodeURIComponent(
                       `/uploads/profile-image/${user.avatar}`,
                     )}`
-                  : "/images/artsphere_logo.png"
+                  : "/images/default-avatar.jpg"
               }
               alt="avatar"
               className="w-full h-full object-cover"
               onError={(e) => {
-                e.currentTarget.src = "/images/artsphere_logo.png";
+                e.currentTarget.src = "/images/default-avatar.jpg";
               }}
             />
           </div>
@@ -149,8 +146,22 @@ export default function ProfilePage() {
 
             <div className="flex gap-12 text-black">
               <Stat label="posts" value={user.postCount} />
-              <Stat label="following" value={user.followingCount} />
-              <Stat label="followers" value={user.followerCount} />
+
+              <button
+                type="button"
+                onClick={() => setListOpen("following")}
+                className="text-left hover:opacity-80 transition"
+              >
+                <Stat label="following" value={user.followingCount} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setListOpen("followers")}
+                className="text-left hover:opacity-80 transition"
+              >
+                <Stat label="followers" value={user.followerCount} />
+              </button>
             </div>
 
             {user.bio && (
@@ -167,58 +178,46 @@ export default function ProfilePage() {
         </div>
 
         {/* Posts grid */}
-        <div className="grid grid-cols-3 gap-2 md:gap-4">
-          {posts.length > 0 ? (
-            posts.map((post) => {
-              const path = resolvePostPath(post);
-
-              return (
-                <div
-                  key={post._id}
-                  className="relative aspect-square bg-gray-100 overflow-hidden group"
-                >
-                  {path ? (
-                    <img
-                      src={`/api/image?path=${encodeURIComponent(path)}`}
-                      alt="post"
-                      className="w-full h-full object-cover group-hover:scale-110 transition duration-500"
-                      onError={(e) => {
-                        e.currentTarget.src = "/images/artsphere_logo.png";
-                      }}
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                      No media
-                    </div>
-                  )}
-
-                  {/* Hover overlay */}
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition flex items-center justify-center opacity-0 group-hover:opacity-100">
-                    <div className="flex gap-6 text-white font-bold">
-                      {post.likeCount != null && (
-                        <div className="flex items-center gap-2">
-                          <Heart size={18} fill="white" />
-                          <span>{post.likeCount}</span>
-                        </div>
-                      )}
-                      {post.commentCount != null && (
-                        <div className="flex items-center gap-2">
-                          <span className="text-lg">💬</span>
-                          <span>{post.commentCount}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className="col-span-3 text-center py-20 text-gray-400 italic">
-              No posts yet
-            </div>
-          )}
-        </div>
+        <PostGrid
+          posts={posts}
+          showHoverOverlay
+          onPostClick={(p) => setActivePost(p as Post)}
+        />
       </main>
+
+      {/* Shared Followers/Following modal */}
+      <FollowersFollowingModal
+        open={listOpen !== null}
+        kind={listOpen ?? "followers"}
+        userId={user._id}
+        onClose={() => setListOpen(null)}
+      />
+
+      {/* Post details modal (delete allowed on my profile) */}
+      <PostDetailsModal
+        open={!!activePost}
+        post={activePost}
+        canDelete={true}
+        onClose={() => setActivePost(null)}
+        onDeleted={(postId) => {
+          setPosts((prev) => prev.filter((p) => p._id !== postId));
+          setUser((prev) =>
+            prev
+              ? { ...prev, postCount: Math.max(0, prev.postCount - 1) }
+              : prev,
+          );
+        }}
+        onPostUpdated={(updated) => {
+          setPosts((prev) =>
+            prev.map((p) => (p._id === updated._id ? { ...p, ...updated } : p)),
+          );
+          setActivePost((prev) =>
+            prev && prev._id === updated._id
+              ? ({ ...prev, ...updated } as any)
+              : prev,
+          );
+        }}
+      />
     </div>
   );
 }

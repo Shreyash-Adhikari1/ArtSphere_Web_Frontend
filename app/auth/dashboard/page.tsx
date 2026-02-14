@@ -38,7 +38,7 @@ function resolveMediaUrl(
 }
 
 function resolveAvatarUrl(base: string, avatar?: string) {
-  if (!avatar) return "/images/default-avatar.png";
+  if (!avatar) return "/images/default-avatar.jpg";
 
   if (avatar.startsWith("http://") || avatar.startsWith("https://")) {
     return avatar;
