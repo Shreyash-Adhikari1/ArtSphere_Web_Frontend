@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Settings, Grid, Heart, Bookmark } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
+import { Settings, Grid, Heart, Bookmark, Pencil, LogOut } from "lucide-react";
+import { useRouter } from "next/navigation";
 import Sidebar from "../(public)/_components/Sidebar";
 import FollowersFollowingModal from "@/app/(auth)/_components/FollowersFollowingModal";
 import PostGrid, { type GridPost } from "@/app/(auth)/_components/PostGrid";
@@ -10,7 +11,7 @@ import PostDetailsModal from "@/app/(auth)/_components/PostDetailsModal";
 /* ---------- Types ---------- */
 
 type User = {
-  _id: string; // IMPORTANT (needed for /api/follow/:userId/..)
+  _id: string;
   username: string;
   fullName: string;
   bio?: string;
@@ -27,6 +28,8 @@ type Post = GridPost & {
 /* ---------- Page ---------- */
 
 export default function ProfilePage() {
+  const router = useRouter();
+
   const [user, setUser] = useState<User | null>(null);
   const [posts, setPosts] = useState<Post[]>([]);
   const [activePost, setActivePost] = useState<Post | null>(null);
@@ -37,6 +40,10 @@ export default function ProfilePage() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  // settings dropdown
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement | null>(null);
 
   /* ---- Fetch user profile ---- */
   async function loadProfile() {
@@ -49,9 +56,6 @@ export default function ProfilePage() {
       }
 
       const u = data.user || data.data || data;
-
-      // If your backend doesn't return _id, this will fail the modal.
-      // Best fix: ensure /api/user/me returns _id.
       setUser(u);
     } catch (e: any) {
       setError(e.message || "Failed to load profile");
@@ -70,7 +74,7 @@ export default function ProfilePage() {
         setPosts(data.posts);
       }
     } catch {
-      // silent fail – profile still renders
+      // silent fail
     }
   }
 
@@ -81,6 +85,27 @@ export default function ProfilePage() {
       setLoading(false);
     })();
   }, []);
+
+  // close dropdown on outside click + ESC
+  useEffect(() => {
+    function onDown(e: MouseEvent) {
+      if (!menuOpen) return;
+      const target = e.target as Node;
+      if (menuRef.current && !menuRef.current.contains(target)) {
+        setMenuOpen(false);
+      }
+    }
+    function onKey(e: KeyboardEvent) {
+      if (!menuOpen) return;
+      if (e.key === "Escape") setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", onDown);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
 
   /* ---------- States ---------- */
 
@@ -115,7 +140,47 @@ export default function ProfilePage() {
       <main className="flex-1 px-6 md:px-12 py-8 max-w-6xl mx-auto font-serif">
         {/* Top bar */}
         <div className="flex justify-end mb-6">
-          <Settings className="text-[#C974A6] cursor-pointer" size={24} />
+          <div className="relative" ref={menuRef}>
+            <button
+              type="button"
+              onClick={() => setMenuOpen((p) => !p)}
+              className="p-2 rounded-full hover:bg-gray-100 transition"
+              aria-label="Settings"
+            >
+              <Settings className="text-[#C974A6]" size={24} />
+            </button>
+
+            {/* Dropdown */}
+            {menuOpen && (
+              <div className="absolute right-0 mt-2 w-52 bg-white border shadow-lg rounded-2xl overflow-hidden z-20">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    router.push("/profile/edit");
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-50 transition"
+                >
+                  <Pencil size={16} className="text-[#C974A6]" />
+                  <span className="font-semibold text-black">Edit profile</span>
+                </button>
+
+                {/* Optional: add logout later if you have an endpoint */}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    // TODO: hook to your logout flow if you have one
+                    console.log("logout later");
+                  }}
+                  className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-gray-50 transition"
+                >
+                  <LogOut size={16} className="text-gray-600" />
+                  <span className="font-semibold text-black">Logout</span>
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Profile header */}
@@ -185,7 +250,7 @@ export default function ProfilePage() {
         />
       </main>
 
-      {/* Shared Followers/Following modal */}
+      {/* Followers/Following modal */}
       <FollowersFollowingModal
         open={listOpen !== null}
         kind={listOpen ?? "followers"}
