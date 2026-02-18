@@ -16,6 +16,9 @@ export type FeedPost = {
   isChallengeSubmission?: boolean;
   createdAt?: string;
 
+  // from backend
+  likedBy?: string[];
+
   // optional flags some APIs may return
   likedByMe?: boolean;
   isLiked?: boolean;
@@ -64,6 +67,9 @@ export default function FeedPosts({
   const BASE = process.env.NEXT_PUBLIC_API_BASE_URL || "http://localhost:5000";
   const router = useRouter();
 
+  // ✅ get myId once from /me (your getProfile)
+  const [myId, setMyId] = useState<string | null>(null);
+
   // likes
   const [likedMap, setLikedMap] = useState<Record<string, boolean>>({});
   const [pendingLike, setPendingLike] = useState<Record<string, boolean>>({});
@@ -71,7 +77,40 @@ export default function FeedPosts({
   // comments modal
   const [activePostId, setActivePostId] = useState<string | null>(null);
 
-  // initialize liked map whenever posts changes
+  // ✅ fetch current user id (adjust endpoint to your proxy path)
+  useEffect(() => {
+    async function loadMe() {
+      try {
+        const res = await fetch("/api/user/me", {
+          method: "GET",
+          credentials: "include",
+        });
+        const data = await res.json();
+        const id = data?.user?._id || data?.data?._id || data?._id;
+        if (id) setMyId(String(id));
+      } catch (e) {
+        // ignore; likes will just behave like "unknown"
+      }
+    }
+    loadMe();
+  }, []);
+
+  // ✅ keep your UI logic unchanged by injecting likedByMe into posts
+  useEffect(() => {
+    if (!myId || posts.length === 0) return;
+
+    setPosts((prev) =>
+      prev.map((p) => {
+        const likedBy = p.likedBy ?? [];
+        const likedByMe = likedBy.includes(myId);
+        // only add/refresh flags; keep everything else the same
+        return { ...p, likedByMe, isLiked: likedByMe };
+      }),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [myId]);
+
+  // initialize liked map whenever posts changes (UNCHANGED)
   useEffect(() => {
     const initial: Record<string, boolean> = {};
     for (const p of posts) {
@@ -93,6 +132,9 @@ export default function FeedPosts({
         p._id === postId
           ? {
               ...p,
+              // ✅ update flags too so refresh/rebuild doesn't break
+              likedByMe: !currentlyLiked,
+              isLiked: !currentlyLiked,
               likeCount: Math.max(
                 0,
                 (p.likeCount ?? 0) + (currentlyLiked ? -1 : 1),
@@ -109,7 +151,10 @@ export default function FeedPosts({
         ? `/api/post/unlike/${postId}`
         : `/api/post/like/${postId}`;
 
-      const res = await fetch(endpoint, { method: "POST" });
+      const res = await fetch(endpoint, {
+        method: "POST",
+        credentials: "include",
+      });
 
       const text = await res.text();
       let data: any = null;
@@ -130,6 +175,8 @@ export default function FeedPosts({
           p._id === postId
             ? {
                 ...p,
+                likedByMe: currentlyLiked,
+                isLiked: currentlyLiked,
                 likeCount: Math.max(
                   0,
                   (p.likeCount ?? 0) + (currentlyLiked ? 1 : -1),
@@ -258,7 +305,6 @@ export default function FeedPosts({
               <Bookmark className="text-black cursor-pointer" size={20} />
             </div>
 
-            {/* Comments Modal */}
             {activePostId === post._id && (
               <CommentsModal
                 postId={post._id}
