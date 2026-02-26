@@ -65,7 +65,7 @@ export default function AddPostPage() {
       <Sidebar />
 
       <main className="flex-1 flex items-center justify-center p-4">
-        <div className="bg-white rounded-[32px] w-full max-w-[700px] aspect-[4/3] flex flex-col shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-4xl w-full max-w-175 aspect-4/3 flex flex-col shadow-sm border border-gray-100 overflow-hidden">
           {/* Header */}
           <div className="grid grid-cols-3 items-center w-full border-b border-gray-100 py-4 px-6">
             <button
@@ -77,7 +77,7 @@ export default function AddPostPage() {
             <div className="text-center">
               <h2 className="text-xl font-bold text-gray-800 tracking-tight relative inline-block">
                 New Post
-                <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-gray-800 rounded-full"></span>
+                <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gray-800 rounded-full"></span>
               </h2>
             </div>
             <div /> {/* Spacer for grid alignment */}
@@ -99,13 +99,13 @@ export default function AddPostPage() {
             </div>
 
             {/* Inputs Container */}
-            <div className="w-full max-w-[450px] space-y-6">
+            <div className="w-full max-w-112.5 space-y-6">
               <div className="relative">
                 <input
                   placeholder="Write anything you want to share :)"
                   value={caption}
                   onChange={(e) => setCaption(e.target.value)}
-                  className="w-full text-[#8e8e8e] placeholder:text-gray-300 border-b border-gray-800 py-2 outline-none text-lg transition-colors focus:border-[#cc7fac]"
+                  className="w-full text-black placeholder:text-gray-300 border-b border-gray-800 py-2 outline-none text-lg transition-colors focus:border-[#cc7fac]"
                 />
               </div>
 
@@ -113,7 +113,7 @@ export default function AddPostPage() {
                 placeholder="Tags (comma separated)"
                 value={tags}
                 onChange={(e) => setTags(e.target.value)}
-                className="w-full text-[#8e8e8e] placeholder:text-gray-300 border-b border-gray-800 py-2 outline-none text-sm transition-colors focus:border-[#cc7fac]"
+                className="w-full text-black placeholder:text-gray-300 border-b border-gray-800 py-2 outline-none text-sm transition-colors focus:border-[#cc7fac]"
               />
 
               {/* Submit Button */}

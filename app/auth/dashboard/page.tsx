@@ -71,7 +71,7 @@ export default function HomePage() {
     <div className="flex bg-white min-h-screen">
       <Sidebar />
 
-      <main className="flex-1 p-8 max-w-4xl mx-auto font-serif">
+      <main className="flex-1 p-8 max-w-4xl mx-auto font-serif text-black">
         {/* Tabs */}
         <div className="flex gap-8 border-b border-gray-100 mb-6">
           <button
@@ -80,7 +80,7 @@ export default function HomePage() {
             className={`pb-2 ${
               feed === "discover"
                 ? "border-b-2 border-black font-bold"
-                : "text-gray-400"
+                : "text-black"
             }`}
           >
             Discover
@@ -92,7 +92,7 @@ export default function HomePage() {
             className={`pb-2 ${
               feed === "following"
                 ? "border-b-2 border-black font-bold"
-                : "text-gray-400"
+                : "text-black"
             }`}
           >
             Following
