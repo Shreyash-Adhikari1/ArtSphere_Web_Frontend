@@ -9,7 +9,6 @@ import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { handleLogin } from "@/lib/actions/auth-action";
-// import { useAuth } from "@/context/AuthContext";
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
@@ -17,7 +16,6 @@ export default function LoginForm() {
   const router = useRouter();
   const [error, setError] = useState("");
   const [isPending, startTransition] = useTransition();
-  // const {checkAuth}= useAuth();
 
   const {
     register,
@@ -35,8 +33,6 @@ export default function LoginForm() {
         throw new Error(res.message || "Login Failed");
       }
 
-      //   await checkAuth();
-      // handle transition
       startTransition(() => {
         router.push("/auth/dashboard");
       });
@@ -46,28 +42,44 @@ export default function LoginForm() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-white">
+    <div
+      data-testid="login-container"
+      className="flex min-h-screen items-center justify-center bg-white"
+    >
       <div className="flex w-full max-w-6xl items-center justify-around p-10">
         {/* Left Side: Form */}
         <form
+          noValidate
+          data-testid="login-form"
           onSubmit={handleSubmit(onSubmit)}
           className="flex flex-col w-full max-w-sm"
         >
-          <h1 className="text-5xl font-bold mb-12 text-black">Login</h1>
+          <h1
+            data-testid="login-title"
+            className="text-5xl font-bold mb-12 text-black"
+          >
+            Login
+          </h1>
 
           <div className="space-y-6 mb-10">
             <div className="relative">
               <span className="absolute left-4 top-1/2 -translate-y-1/2">
                 📧
               </span>
+
               <input
+                data-testid="login-email"
                 type="email"
                 placeholder="Email"
                 {...register("email")}
                 className="w-full py-4 pl-12 pr-4 rounded-full bg-[#F3E8EE] text-black outline-none focus:ring-2 focus:ring-[#C974A6]"
               />
+
               {errors.email && (
-                <p className="text-red-500 text-sm mt-1">
+                <p
+                  data-testid="login-email-error"
+                  className="text-red-500 text-sm mt-1"
+                >
                   {errors.email.message}
                 </p>
               )}
@@ -77,14 +89,20 @@ export default function LoginForm() {
               <span className="absolute left-4 top-1/2 -translate-y-1/2">
                 🔒
               </span>
+
               <input
+                data-testid="login-password"
                 type="password"
                 placeholder="Password"
                 {...register("password")}
                 className="w-full py-4 pl-12 pr-12 rounded-full bg-[#F3E8EE] text-black outline-none focus:ring-2 focus:ring-[#C974A6]"
               />
+
               {errors.password && (
-                <p className="text-red-500 text-sm mt-1">
+                <p
+                  data-testid="login-password-error"
+                  className="text-red-500 text-sm mt-1"
+                >
                   {errors.password.message}
                 </p>
               )}
@@ -93,6 +111,7 @@ export default function LoginForm() {
 
           <div className="flex flex-col items-center space-y-4">
             <button
+              data-testid="login-submit"
               type="submit"
               className="bg-[#C974A6] text-white px-20 py-3 rounded-full text-lg font-semibold hover:opacity-90 transition shadow-md"
             >
@@ -100,6 +119,7 @@ export default function LoginForm() {
             </button>
 
             <Link
+              data-testid="login-forgot-link"
               href="/request-password-reset"
               className="text-[#FF0000] text-sm font-bold hover:underline"
             >
@@ -107,9 +127,22 @@ export default function LoginForm() {
             </Link>
           </div>
 
+          {error && (
+            <p
+              data-testid="login-server-error"
+              className="text-red-500 text-sm text-center mt-4"
+            >
+              {error}
+            </p>
+          )}
+
           <div className="mt-12 text-center text-gray-500 font-medium">
             Don't have an Account?{" "}
-            <Link href="/register" className="text-[#FF0000] font-bold">
+            <Link
+              data-testid="login-signup-link"
+              href="/register"
+              className="text-[#FF0000] font-bold"
+            >
               Signup!
             </Link>
           </div>
@@ -119,6 +152,7 @@ export default function LoginForm() {
         <div className="hidden lg:block relative">
           <div className="w-112.5 h-112.5 rounded-full overflow-hidden border-2 border-gray-100 flex items-center justify-center">
             <Image
+              data-testid="login-logo"
               src="/images/artsphere_logo.png"
               alt="ArtSphere Illustration"
               width={450}
