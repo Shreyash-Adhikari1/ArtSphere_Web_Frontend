@@ -59,10 +59,7 @@ export default function RegisterForm() {
         onSubmit={handleSubmit(onSubmit)}
         className="flex items-center w-full"
       >
-        <div
-          style={{ marginLeft: "261px" }}
-          className="w-[420px] flex flex-col"
-        >
+        <div style={{ marginLeft: "261px" }} className="w-105 flex flex-col">
           <h1 className="text-5xl font-bold mb-10 text-black">Signup</h1>
 
           <div className="space-y-4 mb-10">
@@ -138,7 +135,7 @@ export default function RegisterForm() {
         </div>
 
         <div style={{ marginLeft: "356px" }} className="hidden lg:block">
-          <div className="w-[520px] h-[520px] rounded-full border flex items-center justify-center">
+          <div className="w-130 h-130 rounded-full border flex items-center justify-center">
             <Image
               src="/images/artsphere_logo.png"
               alt=""
