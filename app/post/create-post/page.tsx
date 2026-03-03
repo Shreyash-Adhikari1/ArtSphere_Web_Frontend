@@ -28,12 +28,12 @@ export default function CreatePostPage() {
 
       <main className="flex-1 flex items-center justify-center p-4">
         {/* Main Modal-style Container */}
-        <div className="bg-white rounded-[32px] w-full max-w-[700px] aspect-[4/3] flex flex-col items-center justify-center shadow-sm border border-gray-100">
+        <div className="bg-white rounded-4xl w-full max-w-175 aspect-4/3flex flex-col items-center justify-center shadow-sm border border-gray-100">
           {/* Header */}
           <div className="w-full border-b border-gray-100 py-4 text-center">
             <h2 className="text-xl font-bold text-gray-800 tracking-tight relative inline-block">
               Create your post
-              <span className="absolute -bottom-1 left-0 w-full h-[2px] bg-gray-800 rounded-full"></span>
+              <span className="absolute -bottom-1 left-0 w-full h-0.5 bg-gray-800 rounded-full"></span>
             </h2>
           </div>
 
@@ -44,9 +44,9 @@ export default function CreatePostPage() {
               <Camera size={80} strokeWidth={1.5} className="text-black" />
               {/* Flash accent lines */}
               <div className="absolute -top-4 left-1/2 -translate-x-1/2 flex gap-1">
-                <div className="w-[2px] h-3 bg-black rotate-[-20deg]"></div>
-                <div className="w-[2px] h-4 bg-black"></div>
-                <div className="w-[2px] h-3 bg-black rotate-[20deg]"></div>
+                <div className="w-0.5 h-3 bg-black rotate-[-20deg]"></div>
+                <div className="w-0.5 h-4 bg-black"></div>
+                <div className="w-0.5 h-3 bg-black rotate-20"></div>
               </div>
             </div>
 
