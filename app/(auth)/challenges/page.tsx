@@ -342,7 +342,7 @@ export default function ChallengesPage() {
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search by title, description, or creator…"
-                className="w-full pl-11 pr-4 py-2 rounded-full border bg-white outline-none focus:ring-2 focus:ring-[#C974A6]/30"
+                className="w-full pl-11 pr-4 py-2 rounded-full border bg-white outline-none focus:ring-2 focus:ring-[#C974A6]/30 text-gray-600"
               />
             </div>
           </div>

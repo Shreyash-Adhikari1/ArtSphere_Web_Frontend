@@ -245,7 +245,6 @@ export default function EditProfilePage() {
 
                 <p className="mt-4 text-xs text-gray-500 text-center">
                   Click the avatar to upload a new photo. <br />
-                  Field name: <span className="font-bold">profile-image</span>
                 </p>
 
                 {avatarFile && (
@@ -333,11 +332,6 @@ export default function EditProfilePage() {
                 </div>
               </div>
             </div>
-
-            <p className="mt-4 text-xs text-gray-400">
-              Tip: save will upload your avatar (if selected) + text fields in
-              one request.
-            </p>
           </section>
         </div>
       </main>

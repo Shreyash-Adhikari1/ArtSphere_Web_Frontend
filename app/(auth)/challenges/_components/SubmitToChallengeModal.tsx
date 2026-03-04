@@ -336,7 +336,7 @@ export default function SubmitToChallengeModal({
                     type="file"
                     accept="image/*"
                     onChange={(e) => setNewFile(e.target.files?.[0] || null)}
-                    className="w-full text-sm"
+                    className="w-full text-sm text-black"
                   />
 
                   {/* ✅ Preview */}
@@ -355,10 +355,6 @@ export default function SubmitToChallengeModal({
                       </div>
                     )}
                   </div>
-
-                  <p className="text-xs text-gray-400 mt-2">
-                    Field name is <b>challenge-submissions</b>.
-                  </p>
                 </div>
 
                 <div className="border rounded-3xl p-4 bg-white">
@@ -368,7 +364,7 @@ export default function SubmitToChallengeModal({
                   <textarea
                     value={newCaption}
                     onChange={(e) => setNewCaption(e.target.value)}
-                    className="w-full px-4 py-3 rounded-2xl border outline-none focus:ring-2 focus:ring-[#C974A6]/30 min-h-30"
+                    className="w-full px-4 py-3 rounded-2xl border outline-none focus:ring-2 focus:ring-[#C974A6]/30 min-h-30 text-gray-700"
                     placeholder="Describe your submission…"
                   />
                 </div>

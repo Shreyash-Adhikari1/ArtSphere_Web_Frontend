@@ -48,7 +48,7 @@ export default function LandingPage() {
         </div>
 
         <div className="relative">
-          <div className="w-[500px] h-[500px] rounded-full bg-[#FFF6ED] flex items-center justify-center border-2 border-[#F3E8EE]">
+          <div className="w-125 h-125 rounded-full bg-[#FFF6ED] flex items-center justify-center border-2 border-[#F3E8EE]">
             <Image
               src="/images/artsphere_logo.png"
               alt="ArtSphere"
@@ -66,42 +66,70 @@ export default function LandingPage() {
           <div className="flex justify-between items-end mb-12">
             <div>
               <h3 className="text-4xl font-bold text-black mb-4">
-                Explore the Gallery
+                Get started in 3 steps
               </h3>
               <p className="text-gray-500 text-lg">
-                See what student artists are creating right now.
+                A quick tour of what you can do inside ArtSphere.
               </p>
             </div>
+
             <Link
               href="/register"
               className="text-[#C974A6] font-bold hover:underline underline-offset-4"
             >
-              View all masterpieces →
+              Join now →
             </Link>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((item) => (
+            {[
+              {
+                image: "/images/onboarding/onboarding_welc.png",
+                title: "Welcome to ArtSphere",
+                description:
+                  "Discover amazing art from talented student creators and build your own space.",
+              },
+              {
+                image: "/images/onboarding/onboarding_connect.png",
+                title: "Connect with Artists",
+                description:
+                  "Follow, like, and comment to support creators and grow your circle.",
+              },
+              {
+                image: "/images/onboarding/onboarding_share.png",
+                title: "Share Your Own Art",
+                description:
+                  "Upload your work, get feedback, and turn your portfolio into a story.",
+              },
+            ].map((item) => (
               <div
-                key={item}
-                className="bg-[#FFF6ED] p-4 rounded-[2rem] border border-[#F3E8EE] shadow-sm hover:shadow-xl transition-shadow group"
+                key={item.title}
+                className="bg-[#FFF6ED] p-6 rounded-4xl border border-[#F3E8EE] shadow-sm hover:shadow-xl transition-shadow group"
               >
-                <div className="relative aspect-square w-full overflow-hidden rounded-[1.5rem] bg-white mb-4">
+                <div className="relative w-full h-60 overflow-hidden rounded-3xl bg-white mb-5 flex items-center justify-center">
                   <Image
-                    src="/images/artsphere_logo.png"
-                    alt="Art Preview"
+                    src={item.image}
+                    alt={item.title}
                     fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="object-contain p-6 group-hover:scale-[1.03] transition-transform duration-500"
                   />
                 </div>
-                <div className="flex justify-between items-center px-2">
-                  <div>
-                    <p className="font-bold text-black">Midnight Sketches</p>
-                    <p className="text-sm text-gray-500">by @artist_student</p>
-                  </div>
-                  <div className="flex items-center gap-1 text-[#C974A6]">
-                    <span className="text-sm font-bold">♥</span>
-                    <span className="text-xs font-bold text-black">24</span>
+
+                <div className="px-1">
+                  <p className="font-bold text-black text-xl mb-2">
+                    {item.title}
+                  </p>
+                  <p className="text-gray-600 text-base leading-relaxed">
+                    {item.description}
+                  </p>
+
+                  <div className="mt-5">
+                    <Link
+                      href="/register"
+                      className="inline-flex items-center gap-2 text-[#C974A6] font-bold hover:underline underline-offset-4"
+                    >
+                      Try it →
+                    </Link>
                   </div>
                 </div>
               </div>

@@ -1,0 +1,76 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - heading "ArtSphere" [level=1] [ref=e4]
+      - navigation [ref=e5]:
+        - link "Home" [ref=e6] [cursor=pointer]:
+          - /url: /auth/dashboard
+          - img [ref=e7]
+          - generic [ref=e10]: Home
+        - link "Create" [ref=e11] [cursor=pointer]:
+          - /url: /post/create-post
+          - img [ref=e12]
+          - generic [ref=e14]: Create
+        - link "Challenges" [ref=e15] [cursor=pointer]:
+          - /url: /challenges
+          - img [ref=e16]
+          - generic [ref=e18]: Challenges
+        - link "Profile" [ref=e19] [cursor=pointer]:
+          - /url: /profile
+          - img [ref=e20]
+          - generic [ref=e23]: Profile
+        - link "Notifications" [ref=e24] [cursor=pointer]:
+          - /url: /notifications
+          - img [ref=e25]
+          - generic [ref=e28]: Notifications
+      - button "Logout" [ref=e29]:
+        - img [ref=e30]
+        - generic [ref=e33]: Logout
+    - main [ref=e34]:
+      - generic [ref=e36]:
+        - button "Settings" [active] [ref=e37]:
+          - img [ref=e38]
+        - generic [ref=e41]:
+          - button "Edit profile" [ref=e42]:
+            - img [ref=e43]
+            - generic [ref=e46]: Edit profile
+          - button "Logout" [ref=e47]:
+            - img [ref=e48]
+            - generic [ref=e51]: Logout
+      - generic [ref=e52]:
+        - img "avatar" [ref=e54]
+        - generic [ref=e55]:
+          - heading "@me" [level=2] [ref=e56]
+          - generic [ref=e57]:
+            - generic [ref=e58]:
+              - paragraph [ref=e59]: "2"
+              - paragraph [ref=e60]: posts
+            - button "10 following" [ref=e61]:
+              - generic [ref=e62]:
+                - paragraph [ref=e63]: "10"
+                - paragraph [ref=e64]: following
+            - button "20 followers" [ref=e65]:
+              - generic [ref=e66]:
+                - paragraph [ref=e67]: "20"
+                - paragraph [ref=e68]: followers
+          - paragraph [ref=e69]: “bio”
+      - generic [ref=e70]:
+        - img [ref=e72] [cursor=pointer]
+        - img [ref=e75] [cursor=pointer]
+        - img [ref=e78] [cursor=pointer]
+      - button "post 1 💬 1" [ref=e81]:
+        - img "post" [ref=e82]
+        - generic [ref=e84]:
+          - generic [ref=e85]:
+            - img [ref=e86]
+            - generic [ref=e88]: "1"
+          - generic [ref=e89]:
+            - generic [ref=e90]: 💬
+            - generic [ref=e91]: "1"
+  - button "Open Next.js Dev Tools" [ref=e97] [cursor=pointer]:
+    - img [ref=e98]
+  - alert [ref=e101]
+```

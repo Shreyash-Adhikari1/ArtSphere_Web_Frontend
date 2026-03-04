@@ -163,7 +163,10 @@ export default function PostDetailsModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center"
+      data-testid="post-details-modal"
+    >
       {/* backdrop */}
       <button
         className="absolute inset-0 bg-black/40"

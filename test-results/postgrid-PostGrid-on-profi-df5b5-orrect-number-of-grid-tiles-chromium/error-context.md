@@ -1,0 +1,78 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - generic [ref=e3]:
+      - heading "ArtSphere" [level=1] [ref=e4]
+      - navigation [ref=e5]:
+        - link "Home" [ref=e6] [cursor=pointer]:
+          - /url: /auth/dashboard
+          - img [ref=e7]
+          - generic [ref=e10]: Home
+        - link "Create" [ref=e11] [cursor=pointer]:
+          - /url: /post/create-post
+          - img [ref=e12]
+          - generic [ref=e14]: Create
+        - link "Challenges" [ref=e15] [cursor=pointer]:
+          - /url: /challenges
+          - img [ref=e16]
+          - generic [ref=e18]: Challenges
+        - link "Profile" [ref=e19] [cursor=pointer]:
+          - /url: /profile
+          - img [ref=e20]
+          - generic [ref=e23]: Profile
+        - link "Notifications" [ref=e24] [cursor=pointer]:
+          - /url: /notifications
+          - img [ref=e25]
+          - generic [ref=e28]: Notifications
+      - button "Logout" [ref=e29]:
+        - img [ref=e30]
+        - generic [ref=e33]: Logout
+    - main [ref=e34]:
+      - button "Settings" [ref=e37]:
+        - img [ref=e38]
+      - generic [ref=e41]:
+        - img "avatar" [ref=e43]
+        - generic [ref=e44]:
+          - heading "@me" [level=2] [ref=e45]
+          - generic [ref=e46]:
+            - generic [ref=e47]:
+              - paragraph [ref=e48]: "2"
+              - paragraph [ref=e49]: posts
+            - button "10 following" [ref=e50]:
+              - generic [ref=e51]:
+                - paragraph [ref=e52]: "10"
+                - paragraph [ref=e53]: following
+            - button "20 followers" [ref=e54]:
+              - generic [ref=e55]:
+                - paragraph [ref=e56]: "20"
+                - paragraph [ref=e57]: followers
+          - paragraph [ref=e58]: “bio”
+      - generic [ref=e59]:
+        - img [ref=e61] [cursor=pointer]
+        - img [ref=e64] [cursor=pointer]
+        - img [ref=e67] [cursor=pointer]
+      - generic [ref=e69]:
+        - button "post 4 💬 1" [ref=e70]:
+          - img "post" [ref=e71]
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - img [ref=e75]
+              - generic [ref=e77]: "4"
+            - generic [ref=e78]:
+              - generic [ref=e79]: 💬
+              - generic [ref=e80]: "1"
+        - button "post 2 💬 0" [ref=e81]:
+          - img "post" [ref=e82]
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - img [ref=e86]
+              - generic [ref=e88]: "2"
+            - generic [ref=e89]:
+              - generic [ref=e90]: 💬
+              - generic [ref=e91]: "0"
+  - button "Open Next.js Dev Tools" [ref=e97] [cursor=pointer]:
+    - img [ref=e98]
+  - alert [ref=e101]
+```
